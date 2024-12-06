@@ -4,6 +4,7 @@ import { checkPostCount } from '../middlewares/checkPostCount.middleware';
 import { config } from "../config";
 import DataService from "../modules/services/data.service";
 import logRequest from "../middlewares/logRequest.middleware"
+import * as Joi from "joi";
 
 let testArr = [4, 5, 6, 3, 5, 3, 7, 5, 13, 5, 6, 4, 3, 6, 3, 6];
 
@@ -39,39 +40,6 @@ class PostController implements Controller {
   };
 
 
-
-  // private getEntryById = async (request: Request, response: Response) => {
-  //   const id = parseInt(request.params.id, 10);
-
-  //   if (id >= 0 && id < testArr.length) {
-  //     response.status(200).json({ id, value: testArr[id] });
-  //   } else {
-  //     response.status(404).json({ message: 'Entry not found' });
-  //   }
-  // };
-
-  // private addNewEntry = async (request: Request, response: Response) => {
-  //   const { value } = request.body;
-
-  //   if (value !== undefined) {
-  //     testArr.push(value);
-  //     response.status(201).json({ message: 'New entry added', testArr });
-  //   } else {
-  //     response.status(400).json({ message: 'Invalid data' });
-  //   }
-  // };
-
-  // private deleteEntryById = async (request: Request, response: Response) => {
-  //   const id = parseInt(request.params.id, 10);
-
-  //   if (id >= 0 && id < testArr.length) {
-  //     const removedValue = testArr.splice(id, 1);
-  //     response.status(200).json({ message: 'Entry deleted', removedValue, testArr });
-  //   } else {
-  //     response.status(404).json({ message: 'Entry not found' });
-  //   }
-  // };
-
   private getNEntries = async (request: Request, response: Response) => {
     const num = parseInt(request.params.num, 10);
 
@@ -82,24 +50,24 @@ class PostController implements Controller {
     }
   };
 
-  // private getPostByNum = async (request: Request, response: Response) => {
-  //   const { num } = request.params;
-  //   const parsedNum = parseInt(num, 10);
-  
-  //   response.status(200).json(testArr.slice(0, parsedNum));
-  // };
-
   private addData = async (request: Request, response: Response, next: NextFunction) => {
     const {title, text, image} = request.body;
  
-    const readingData = {
-        title,
-        text,
-        image
-    };
+    // const readingData = {
+    //     title,
+    //     text,
+    //     image
+    // };
+    const readingData = Joi.object({
+      title: Joi.string().required(),
+      text: Joi.string().required(),
+      image: Joi.string().uri().required()
+    });
     try {
-      await this.dataService.createPost(readingData);
-      response.status(200).json(readingData);
+      // await this.dataService.createPost(readingData);
+      const validatedData = await readingData.validateAsync( { title, text, image} );
+      await this.dataService.createPost(validatedData);
+      response.status(200).json(validatedData);
   } catch (error) {
       console.log('eeee', error)
 

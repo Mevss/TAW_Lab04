@@ -7,4 +7,4 @@ export const DataSchema: Schema = new Schema({
    image: { type: String, required: true },
 });
 
-export default model<IPost>('Post-SMZ', DataSchema);
+export default model<IPost>('Post-SMK', DataSchema);
